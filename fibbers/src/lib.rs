@@ -56,9 +56,37 @@ fn dijkstra(graph: HashMap<usize, Vec<(usize, i32)>>, start: usize, end: usize) 
     None
 }
 
+/// Performs Depth-First Search (DFS) on a graph.
+fn dfs(graph: &HashMap<usize, Vec<usize>>, node: usize, end: usize, visited: &mut HashSet<usize>, path: &mut Vec<usize>) -> Option<Vec<usize>> {
+    if node == end {
+        // Reached the end node, return the path
+        path.push(node);
+        return Some(path.clone());
+    }
+
+    if visited.contains(&node) {
+        return None; // Node has already been visited
+    }
+
+    visited.insert(node);
+    path.push(node);
+
+    for &neighbor in &graph[&node] {
+        if !visited.contains(&neighbor) {
+            if let Some(result) = dfs(graph, neighbor, end, visited, path) {
+                return Some(result);
+            }
+        }
+    }
+
+    path.pop();
+    None
+}
+
 /// A Python module implemented in Rust.
 #[pymodule]
 fn fibbers(_py: Python, m: &PyModule) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(dijkstra, m)?)?;
+    m.add_function(wrap_pyfunction!(dfs, m)?)?;
     Ok(())
 }
